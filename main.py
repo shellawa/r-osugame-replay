@@ -15,6 +15,5 @@ print("Logged in to", reddit.user.me())
 
 subreddit = reddit.subreddit("allehStestlol")
 
-start_time = time.time()
 for submission in subreddit.stream.submissions(skip_existing=True):
     print(submission.title)
