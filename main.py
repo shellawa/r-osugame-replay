@@ -1,6 +1,5 @@
 import os
 import praw
-import time
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -17,8 +16,5 @@ print("Logged in to", reddit.user.me())
 subreddit = reddit.subreddit("allehStestlol")
 
 start_time = time.time()
-for submission in subreddit.stream.submissions():
-    if submission.created_utc < start_time:
-        # skip older posts
-        continue
+for submission in subreddit.stream.submissions(skip_existing=True):
     print(submission.title)
