@@ -5,11 +5,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 reddit = praw.Reddit(
-    client_id=os.environ.get("CLIENT_ID"),
-    client_secret=os.environ.get("CLIENT_SECRET"),
-    username=os.environ.get("USERNAME"),
-    password=os.environ.get("PASSWORD"),
-    user_agent=os.environ.get("USER_AGENT"),
+    client_id=os.environ["CLIENT_ID"],
+    client_secret=os.environ["CLIENT_SECRET"],
+    username=os.environ["USERNAME"],
+    password=os.environ["PASSWORD"],
+    user_agent=os.environ["USER_AGENT"],
 )
 
 print("Logged in to", reddit.user.me())
