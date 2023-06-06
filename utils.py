@@ -3,15 +3,17 @@ import os
 import requests
 
 
-def get_access_token():
+def get_access_token():  # using lazer access token as it doesn't require user input
     if not os.environ.get("EXPIRE_AT") or time() > float(os.environ["EXPIRE_AT"]):
         res = requests.post(
             "https://osu.ppy.sh/oauth/token",
             data={
-                "client_id": os.environ["BANCHO_CLIENT_ID"],
-                "client_secret": os.environ["BANCHO_CLIENT_SECRET"],
-                "grant_type": "client_credentials",
-                "scope": "public",
+                "client_id": "5",
+                "client_secret": "FGc9GAtyHzeQDshWP5Ah7dega8hJACAJpQtw6OXk",
+                "username": os.environ["LAZER_USERNAME"],
+                "password": os.environ["LAZER_PASSWORD"],
+                "grant_type": "password",
+                "scope": "*",
             },
         ).json()
         os.environ["BANCHO_ACCESS_TOKEN"] = res["access_token"]
