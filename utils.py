@@ -32,3 +32,17 @@ def replay_download(access_token, scoreID):
         },
     )
     return res.content
+
+
+def ordr_post(replay):
+    res = requests.post(
+        "https://apis.issou.best/ordr/renders",
+        data={
+            "username": "shellawa",
+            "resolution": "1280x720",
+            "skin": "whitecatCK1.0",
+            "verificationKey": "devmode_success",
+        },
+        files={"replayFile": ("replay.osr", replay)},
+    ).json()
+    return res["renderID"]
