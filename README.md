@@ -3,6 +3,8 @@
 This is a reddit bot for subreddit [r/osugame](https://reddit.com/r/osugame) on reddit. It will reply to scoreposts with a replay video rendered on [o!rdr](https://ordr.issou.best/). (Only if the replay is available on bancho).\
 The bot uses lazer login credentials to communicate with osu!apiV2.\
 It might break sometimes but idk
+## Requirement
+Python 3.11 (I didn't try older version)
 ## Usage
 ```
 python main.py
