@@ -29,21 +29,51 @@ print("Logged in to", reddit.user.me())
 subreddit = reddit.subreddit("allehStestlol")
 
 for submission in subreddit.stream.submissions(skip_existing=True):
+    # only catch submissions with "Gameplay" in flair
     if submission.link_flair_text != "Gameplay":
         continue
     print("found new submission:", submission.title)
-    access_token = utils.get_access_token()
+
+    # getting access token
+    try:
+        access_token = utils.get_access_token()
+    except:
+        print("error getting access token")
+        continue
     print("got access token")
-    scoreID = utils.parse_submission(submission.title, access_token)
-    if not scoreID:
-        print("replay unavailable")
+
+    # parse the title of the submission and find the score
+    try:
+        scoreID = utils.parse_submission(submission.title, access_token)
+        if not scoreID:
+            print("replay unavailable")
+    except:
+        print("error finding the score")
+        continue
     print("found the score:", scoreID)
-    replay = utils.replay_download(access_token, scoreID)
+
+    # download the replay
+    try:
+        replay = utils.replay_download(access_token, scoreID)
+    except:
+        print("error downloading the replay")
+        continue
     print("got the replay for score", scoreID)
-    renderID = utils.ordr_post(replay)
+
+    # post the replay to o!rdr
+    try:
+        renderID = utils.ordr_post(replay)
+    except:
+        print("could't post the replay to o!rdr")
+        continue
     print("posted the replay to o!rdr, renderID:", renderID)
 
     @sio.on("render_done_json")
     def done(msg):
+        if msg["renderID"] == renderID:
+            print(msg)
+
+    @sio.on("render_failed_json")
+    def failed(msg):
         if msg["renderID"] == renderID:
             print(msg)
