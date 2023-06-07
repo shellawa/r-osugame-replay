@@ -47,6 +47,7 @@ for submission in subreddit.stream.submissions(skip_existing=True):
         scoreID = utils.parse_submission(submission.title, access_token)
         if not scoreID:
             print("replay unavailable")
+            continue
     except:
         print("error finding the score")
         continue
