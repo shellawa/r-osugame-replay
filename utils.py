@@ -97,7 +97,7 @@ def ordr_post(replay):
         "https://apis.issou.best/ordr/renders",
         data={
             "username": os.environ["RENDER_USERNAME"],
-            "resolution": "1920x1080",
+            "resolution": "1280x720",
             "skin": "whitecatCK1.0",
             "showHitCounter": True,
             "showAimErrorMeter": True,
