@@ -82,7 +82,7 @@ def get_access_token():  # using lazer access token as it doesn't require user i
 
 def replay_download(access_token, scoreID):
     res = requests.get(
-        "https://osu.ppy.sh/api/v2/scores/osu/" + str(scoreID) + "/download",
+        "https://osu.ppy.sh/api/v2/scores/osu/" + scoreID + "/download",
         headers={
             "Accept": "application/octet-stream",
             "Content-Type": "application/octet-stream",

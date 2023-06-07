@@ -29,10 +29,15 @@ print("Logged in to", reddit.user.me())
 subreddit = reddit.subreddit("allehStestlol")
 
 for submission in subreddit.stream.submissions(skip_existing=True):
+    if submission.link_flair_text != "Gameplay":
+        continue
     print("found new submission:", submission.title)
-    scoreID = int(submission.title)
     access_token = utils.get_access_token()
     print("got access token")
+    scoreID = utils.parse_submission(submission.title, access_token)
+    if not scoreID:
+        print("replay unavailable")
+    print("found the score:", scoreID)
     replay = utils.replay_download(access_token, scoreID)
     print("got the replay for score", scoreID)
     renderID = utils.ordr_post(replay)
