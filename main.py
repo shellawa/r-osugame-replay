@@ -68,6 +68,7 @@ for submission in subreddit.stream.submissions(skip_existing=True):
         continue
     print("posted the replay to o!rdr, renderID:", renderID)
 
+    # listtening to ws
     @sio.on("render_done_json")
     def done(msg):
         if msg["renderID"] == renderID:
