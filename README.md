@@ -19,5 +19,6 @@ SUBREDDIT=<The subreddit which the bot is listening to>
 LAZER_USERNAME=<Your osu!lazer username>
 LAZER_PASSWORD=<Your osu!lazer password>
 
+RENDER_USERNAME=<o!rdr display name>
 RENDER_API_KEY=<o!rdr api key>
 ```

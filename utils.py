@@ -96,8 +96,8 @@ def ordr_post(replay):
     res = requests.post(
         "https://apis.issou.best/ordr/renders",
         data={
-            "username": "shellawa",
-            "resolution": "1280x720",
+            "username": os.environ["RENDER_USERNAME"],
+            "resolution": "1920x1080",
             "skin": "whitecatCK1.0",
             "showHitCounter": True,
             "showAimErrorMeter": True,
