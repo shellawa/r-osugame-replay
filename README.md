@@ -13,6 +13,7 @@ CLIENT_ID=<Your Reddit OAuth client id>
 CLIENT_SECRET=<Your reddit OAuth client secret>
 USERNAME=<Your Reddit username>
 PASSWORD=<Your Reddit password>
+USER_AGENT=<User agent used with praw>
 
 LAZER_USERNAME=<Your osu!lazer username>
 LAZER_PASSWORD=<Your osu!lazer password>
