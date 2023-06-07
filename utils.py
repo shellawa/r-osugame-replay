@@ -99,7 +99,9 @@ def ordr_post(replay):
             "username": "shellawa",
             "resolution": "1280x720",
             "skin": "whitecatCK1.0",
-            "verificationKey": "devmode_success",
+            "showHitCounter": True,
+            "showAimErrorMeter": True,
+            "verificationKey": os.environ["RENDER_API_KEY"],
         },
         files={"replayFile": ("replay.osr", replay)},
     ).json()

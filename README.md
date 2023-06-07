@@ -17,4 +17,6 @@ USER_AGENT=<User agent used with praw>
 
 LAZER_USERNAME=<Your osu!lazer username>
 LAZER_PASSWORD=<Your osu!lazer password>
+
+RENDER_API_KEY=<o!rdr api key>
 ```
