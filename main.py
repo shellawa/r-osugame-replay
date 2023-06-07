@@ -71,7 +71,15 @@ for submission in subreddit.stream.submissions(skip_existing=True):
     @sio.on("render_done_json")
     def done(msg):
         if msg["renderID"] == renderID:
-            print(msg)
+            print("successfully rendered the replay, trying to reply to the submission")
+            try:
+                submission.reply(
+                    "[replay provided by o!rdr]({link})\n\n^(this comment is automated, dm me if I got something wrong)".format(
+                        link=msg["videoUrl"]
+                    )
+                )
+            except:
+                print("error trying to reply to the submission")
 
     @sio.on("render_failed_json")
     def failed(msg):
