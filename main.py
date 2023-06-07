@@ -26,7 +26,7 @@ reddit = praw.Reddit(
 
 print("Logged in to", reddit.user.me())
 
-subreddit = reddit.subreddit("allehStestlol")
+subreddit = reddit.subreddit(os.environ["SUBREDDIT"])
 
 for submission in subreddit.stream.submissions(skip_existing=True):
     # only catch submissions with "Gameplay" in flair

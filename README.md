@@ -14,6 +14,7 @@ CLIENT_SECRET=<Your reddit OAuth client secret>
 USERNAME=<Your Reddit username>
 PASSWORD=<Your Reddit password>
 USER_AGENT=<User agent used with praw>
+SUBREDDIT=<The subreddit which the bot is listening to>
 
 LAZER_USERNAME=<Your osu!lazer username>
 LAZER_PASSWORD=<Your osu!lazer password>
