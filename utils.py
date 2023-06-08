@@ -101,6 +101,7 @@ def ordr_post(replay):
             "skin": "whitecatCK1.0",
             "showHitCounter": True,
             "showAimErrorMeter": True,
+            "showScoreboard": True,
             "verificationKey": os.environ["RENDER_API_KEY"],
         },
         files={"replayFile": ("replay.osr", replay)},
