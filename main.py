@@ -28,6 +28,39 @@ print("Logged in to", reddit.user.me())
 
 subreddit = reddit.subreddit(os.environ["SUBREDDIT"])
 
+queue = []
+
+
+# listening to ws events
+@sio.on("render_done_json")
+def done(msg):
+    global queue
+    queueSearch = [x for x in queue if x["id"] == msg["renderID"]]
+    if queueSearch == []:
+        return
+    queue = [x for x in queue if x["id"] != msg["renderID"]]
+    try:
+        queueSearch[0]["sub"].reply(
+            "[replay provided by o!rdr]({link})\n\n----\n\n^(this comment is automated, dm me if I got something wrong)".format(
+                link=msg["videoUrl"]
+            )
+        )
+    except:
+        print("error trying to reply to the submission")
+        return
+    print("replied to the post")
+
+
+@sio.on("render_failed_json")
+def failed(msg):
+    global queue
+    queueSearch = [x for x in queue if x["id"] == msg["renderID"]]
+    if queueSearch == []:
+        return
+    queue = [x for x in queue if x["id"] != msg["renderID"]]
+    print("render failed:", queueSearch[0])
+
+
 for submission in subreddit.stream.submissions(skip_existing=True):
     # only catch submissions with "Gameplay" in flair
     if submission.link_flair_text != "Gameplay":
@@ -69,21 +102,5 @@ for submission in subreddit.stream.submissions(skip_existing=True):
         continue
     print("posted the replay to o!rdr, renderID:", renderID)
 
-    # listtening to ws
-    @sio.on("render_done_json")
-    def done(msg):
-        if msg["renderID"] == renderID:
-            print("successfully rendered the replay, trying to reply to the submission")
-            try:
-                submission.reply(
-                    "[replay provided by o!rdr]({link})\n\n^(this comment is automated, dm me if I got something wrong)".format(
-                        link=msg["videoUrl"]
-                    )
-                )
-            except:
-                print("error trying to reply to the submission")
-
-    @sio.on("render_failed_json")
-    def failed(msg):
-        if msg["renderID"] == renderID:
-            print(msg)
+    # add to render queue
+    queue.append({"id": renderID, "sub": submission})
