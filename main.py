@@ -39,10 +39,15 @@ def done(msg):
     if queueSearch == []:
         return
     queue = [x for x in queue if x["id"] != msg["renderID"]]
+    parsed = queueSearch[0]["parsed"]
     try:
         queueSearch[0]["sub"].reply(
-            "[replay provided by o!rdr]({link})\n\n----\n\n^(this comment is automated, dm me if I got something wrong)".format(
-                link=msg["videoUrl"]
+            "[{username} | {artist} - {title} \[{difficulty}\]]({link})\n\n----\n\n^(replay provided by [o!rdr](https://ordr.issou.best/))\n\n^(this comment is automated, dm me if I got something wrong)".format(
+                link=msg["videoUrl"],
+                username=parsed["username"],
+                artist=parsed["artist"],
+                title=parsed["title"],
+                difficulty=parsed["difficulty"],
             )
         )
     except:
@@ -77,7 +82,7 @@ for submission in subreddit.stream.submissions(skip_existing=True):
 
     # parse the title of the submission and find the score
     try:
-        scoreID = utils.parse_submission(submission.title, access_token)
+        scoreID, parsed = utils.parse_submission(submission.title, access_token)
         if not scoreID:
             print("replay unavailable")
             continue
@@ -103,4 +108,4 @@ for submission in subreddit.stream.submissions(skip_existing=True):
     print("posted the replay to o!rdr, renderID:", renderID)
 
     # add to render queue
-    queue.append({"id": renderID, "sub": submission})
+    queue.append({"id": renderID, "sub": submission, "parsed": parsed})

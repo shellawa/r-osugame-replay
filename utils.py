@@ -58,7 +58,7 @@ def parse_submission(subTitle, access_token):
     ]
     if len(filtered) > 1 or len(filtered) == 0:
         return
-    return str(filtered[0])
+    return str(filtered[0]), parsed
 
 
 def get_access_token():  # using lazer access token as it doesn't require user input
