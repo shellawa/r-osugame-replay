@@ -2,6 +2,7 @@ import os
 import praw
 import utils
 import socketio
+from sty import fg
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -10,7 +11,7 @@ sio = socketio.Client()
 
 @sio.event
 def connect():
-    print("ws connection established")
+    print(fg.green + "ws connection established" + fg.rs)
 
 
 sio.connect("https://ordr-ws.issou.best")
@@ -24,7 +25,7 @@ reddit = praw.Reddit(
     user_agent=os.environ["USER_AGENT"],
 )
 
-print("Logged in to", reddit.user.me())
+print(fg.green + "Logged in to", fg.blue + str(reddit.user.me()) + fg.rs)
 
 subreddit = reddit.subreddit(os.environ["SUBREDDIT"])
 
@@ -51,9 +52,9 @@ def done(msg):
             )
         )
     except:
-        print("error trying to reply to the submission")
+        print(fg.red + "error trying to reply to the submission" + fg.rs)
         return
-    print("replied to the post")
+    print(fg.green + "replied to the post" + fg.rs)
 
 
 @sio.on("render_failed_json")
@@ -63,49 +64,36 @@ def failed(msg):
     if queueSearch == []:
         return
     queue = [x for x in queue if x["id"] != msg["renderID"]]
-    print("render failed:", queueSearch[0])
+    print(fg.red + "render failed:", fg.yellow, queueSearch[0] + fg.rs)
 
 
 for submission in subreddit.stream.submissions(skip_existing=True):
     # only catch submissions with "Gameplay" in flair
-    if submission.link_flair_text != "Gameplay":
-        continue
-    print("found new submission:", submission.title)
-
-    # getting access token
+    # if submission.link_flair_text != "Gameplay":
+    #     continue
+    print(fg.green + "found new submission:", fg.blue + submission.title + fg.rs)
     try:
-        access_token = utils.get_access_token()
-    except:
-        print("error getting access token")
+        scoreID, parsed, access_token = utils.parse_submission(submission.title)
+    except Exception as e:
+        print(fg.red + "error:", e)
         continue
-    print("got access token")
-
-    # parse the title of the submission and find the score
-    try:
-        scoreID, parsed = utils.parse_submission(submission.title, access_token)
-        if not scoreID:
-            print("replay unavailable")
-            continue
-    except:
-        print("error finding the score")
-        continue
-    print("found the score:", scoreID)
+    print(fg.green + "found the score:", fg.blue + scoreID + fg.rs)
 
     # download the replay
     try:
         replay = utils.replay_download(access_token, scoreID)
     except:
-        print("error downloading the replay")
+        print(fg.red + "error:", fg.yellow + "couldn't download the replay" + fg.rs)
         continue
-    print("got the replay for score", scoreID)
+    print(fg.green + "got the replay for score", fg.blue + scoreID + fg.rs)
 
     # post the replay to o!rdr
     try:
         renderID = utils.ordr_post(replay)
     except:
-        print("could't post the replay to o!rdr")
+        print(fg.red + "error:", fg.yellow + "could't post the replay to o!rdr" + fg.rs)
         continue
-    print("posted the replay to o!rdr, renderID:", renderID)
+    print(fg.green + "posted the replay to o!rdr, renderID:", fg.blue + str(renderID) + fg.rs)
 
     # add to render queue
     queue.append({"id": renderID, "sub": submission, "parsed": parsed})

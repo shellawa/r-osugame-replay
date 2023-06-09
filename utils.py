@@ -1,4 +1,5 @@
 from time import time
+from sty import fg
 import os
 import requests
 import re
@@ -12,22 +13,22 @@ re_accuracy = re.compile("(?<=\s)\S+(?=\%)")
 re_ss = re.compile(" ss ", re.IGNORECASE)
 
 
-def parse_submission(subTitle, access_token):
+def parse_submission(subTitle):
     username = re.search(re_username, subTitle)
     if not username:
-        return
+        raise Exception(fg.yellow + "couldn't parse username" + fg.rs)
     artist = re.search(re_artist, subTitle)
     if not artist:
-        return
+        raise Exception(fg.yellow + "couldn't parse artist" + fg.rs)
     title = re.search(re_title, subTitle)
     if not title:
-        return
+        raise Exception(fg.yellow + "couldn't parse title" + fg.rs)
     difficulty = re.search(re_difficulty, subTitle)
     if not difficulty:
-        return
+        raise Exception(fg.yellow + "couldn't parse difficulty" + fg.rs)
     accuracy = re.search(re_accuracy, subTitle.replace(",", "."))
     if not accuracy and not re.search(re_ss, subTitle):
-        return
+        raise Exception(fg.yellow + "couldn't parse accuracy" + fg.rs)
 
     parsed = {
         "username": username.group().strip(),
@@ -37,10 +38,17 @@ def parse_submission(subTitle, access_token):
         "accuracy": "100.00" if not accuracy else accuracy.group(),
     }
 
-    userID = requests.get(
-        "https://osu.ppy.sh/api/v2/users/" + parsed["username"] + "/osu?key=username",
-        headers={"Authorization": "Bearer " + access_token},
-    ).json()["id"]
+    access_token = get_access_token()
+    if not access_token:
+        raise Exception(fg.yellow + "couldn't get access token" + fg.rs)
+    print(fg.green + "got access token" + fg.rs)
+    try:
+        userID = requests.get(
+            "https://osu.ppy.sh/api/v2/users/" + parsed["username"] + "/osu?key=username",
+            headers={"Authorization": "Bearer " + access_token},
+        ).json()["id"]
+    except:
+        raise Exception(fg.yellow + "couldn't find the player with that username" + fg.rs)
 
     scores = requests.get(
         "https://osu.ppy.sh/api/v2/users/" + str(userID) + "/scores/recent?limit=100",
@@ -57,8 +65,8 @@ def parse_submission(subTitle, access_token):
         and round(score["accuracy"] * 100, 2) == float(parsed["accuracy"])
     ]
     if len(filtered) > 1 or len(filtered) == 0:
-        return
-    return str(filtered[0]), parsed
+        raise Exception(fg.yellow + "couldn't find the exact score" + fg.rs)
+    return str(filtered[0]), parsed, access_token
 
 
 def get_access_token():  # using lazer access token as it doesn't require user input

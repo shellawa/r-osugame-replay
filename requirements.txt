@@ -1,3 +1,4 @@
 python-dotenv
 praw
 python-socketio[client]
+sty
