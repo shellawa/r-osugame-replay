@@ -25,7 +25,7 @@ def parse_submission(subTitle, access_token):
     difficulty = re.search(re_difficulty, subTitle)
     if not difficulty:
         return
-    accuracy = re.search(re_accuracy, subTitle)
+    accuracy = re.search(re_accuracy, subTitle.replace(",", "."))
     if not accuracy and not re.search(re_ss, subTitle):
         return
 
