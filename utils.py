@@ -99,6 +99,7 @@ def ordr_post(replay):
             "username": os.environ["RENDER_USERNAME"],
             "resolution": "1280x720",
             "skin": "whitecatCK1.0",
+            "inGameBGDim": "90",
             "showHitCounter": "true",
             "showAimErrorMeter": "true",
             "showScoreboard": "true",
