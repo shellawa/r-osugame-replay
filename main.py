@@ -64,7 +64,7 @@ def failed(msg):
     if queueSearch == []:
         return
     queue = [x for x in queue if x["id"] != msg["renderID"]]
-    print(fg.red + "render failed:", fg.yellow, queueSearch[0] + fg.rs)
+    print(fg.red + "render failed:", fg.yellow, str(queueSearch[0]["id"]) + fg.rs)
 
 
 for submission in subreddit.stream.submissions(skip_existing=True):
