@@ -9,7 +9,7 @@ re_artist = re.compile("(?<= \| )(.*?)(?= \- )")
 re_title = re.compile("(?<= \- )(.*?)(?=\[)")
 re_difficulty = re.compile("(?<=\[)(.*?)(?=\])")
 re_creator = re.compile("(?<=] \()(.*?)(?=,|\|)")
-re_accuracy = re.compile("(?<=\s)\S+(?=\%)")
+re_accuracy = re.compile("\d+(?:\.\d+)?%")
 re_ss = re.compile(" ss ", re.IGNORECASE)
 
 
@@ -35,7 +35,7 @@ def parse_submission(subTitle):
         "artist": artist.group().strip(),
         "title": title.group().strip(),
         "difficulty": difficulty.group().strip(),
-        "accuracy": "100.00" if not accuracy else accuracy.group(),
+        "accuracy": "100.00" if not accuracy else accuracy.group().replace("%", ""),
     }
 
     access_token = get_access_token()
