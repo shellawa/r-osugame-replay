@@ -4,7 +4,7 @@ import os
 import requests
 import re
 
-re_username = re.compile("^[^ | ]+")
+re_username = re.compile("^[^|]*")
 re_artist = re.compile("(?<= \| )(.*?)(?= \- )")
 re_title = re.compile("(?<= \- )(.*?)(?=\[)")
 re_difficulty = re.compile("(?<=\[)(.*?)(?=\])")
