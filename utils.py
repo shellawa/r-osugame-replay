@@ -109,7 +109,7 @@ def ordr_post(replay):
         data={
             "username": os.environ["RENDER_USERNAME"],
             "resolution": "1280x720",
-            "skin": "whitecatCK1.0",
+            "skin": "FreedomDiveBTMC",
             "inGameBGDim": "90",
             "showHitCounter": "true",
             "showAimErrorMeter": "true",
