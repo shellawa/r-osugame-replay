@@ -43,12 +43,13 @@ def done(msg):
     parsed = queueSearch[0]["parsed"]
     try:
         queueSearch[0]["sub"].reply(
-            "[{username} | {artist} - {title} \[{difficulty}\]]({link})\n\n----\n\n^(replay provided by [o!rdr](https://ordr.issou.best/))\n\n^(this comment is automated, dm me if I got something wrong)".format(
+            "[{username} | {artist} - {title} \[{difficulty}\] {accuracy}%]({link})\n\n----\n\n^(replay provided by [o!rdr](https://ordr.issou.best/))\n\n^(this comment is automated, dm me if I got something wrong)".format(
                 link=msg["videoUrl"],
                 username=parsed["username"],
                 artist=parsed["artist"],
                 title=parsed["title"],
                 difficulty=parsed["difficulty"],
+                accuracy=parsed["accuracy"],
             )
         )
     except:
