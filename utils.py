@@ -37,7 +37,10 @@ def parse_submission(subTitle):
         "difficulty": difficulty.group().strip(),
         "accuracy": "100.00" if not accuracy else accuracy.group().replace("%", ""),
     }
+    return parsed
 
+
+def find_score(parsed):
     access_token = get_access_token()
     if not access_token:
         raise Exception(fg.yellow + "couldn't get access token" + fg.rs)
@@ -65,8 +68,8 @@ def parse_submission(subTitle):
         and round(score["accuracy"] * 100, 2) == float(parsed["accuracy"])
     ]
     if len(filtered) > 1 or len(filtered) == 0:
-        raise Exception(fg.yellow + "couldn't find the exact score" + fg.rs)
-    return str(filtered[0]), parsed, access_token
+        raise Exception(fg.yellow + "couldn't find the exact score or the replay isn't available" + fg.rs)
+    return str(filtered[0]), access_token
 
 
 def get_access_token():  # using lazer access token as it doesn't require user input

@@ -73,7 +73,8 @@ for submission in subreddit.stream.submissions(skip_existing=True):
     #     continue
     print(fg.green + "found new submission:", fg.blue + submission.title + fg.rs)
     try:
-        scoreID, parsed, access_token = utils.parse_submission(submission.title)
+        parsed = utils.parse_submission(submission.title)
+        scoreID, access_token = utils.find_score(parsed)
     except Exception as e:
         print(fg.red + "error:", e)
         continue
