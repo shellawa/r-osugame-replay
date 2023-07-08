@@ -68,11 +68,14 @@ def failed(msg):
     print(fg.red + "render failed:", fg.yellow, str(queueSearch[0]["id"]) + fg.rs)
 
 
+cues = ["|", "-", "[", "]"]
+
 for submission in subreddit.stream.submissions(skip_existing=True):
-    # only catch submissions with "Gameplay" in flair
-    # if submission.link_flair_text != "Gameplay":
-    #     continue
-    print(fg.green + "found new submission:", fg.blue + submission.title + fg.rs)
+    # try to ignore other posts than scoreposts
+    if not all([cue in submission.title for cue in cues]):
+        continue
+
+    print(fg.green + "new scorepost:", fg.blue + submission.title + fg.rs)
     try:
         parsed = utils.parse_submission(submission.title)
         scoreID, access_token = utils.find_score(parsed)
