@@ -70,35 +70,37 @@ def failed(msg):
 
 cues = ["|", "-", "[", "]"]
 
-for submission in subreddit.stream.submissions(skip_existing=True):
-    # try to ignore other posts than scoreposts
-    if not all([cue in submission.title for cue in cues]):
-        continue
 
-    print(fg.green + "new scorepost:", fg.blue + submission.title + fg.rs)
-    try:
-        parsed = utils.parse_submission(submission.title)
-        scoreID, access_token = utils.find_score(parsed)
-    except Exception as e:
-        print(fg.red + "error:", e)
-        continue
-    print(fg.green + "found the score:", fg.blue + scoreID + fg.rs)
+while True:
+    for submission in subreddit.stream.submissions(skip_existing=True):
+        # try to ignore other posts than scoreposts
+        if not all([cue in submission.title for cue in cues]):
+            continue
 
-    # download the replay
-    try:
-        replay = utils.replay_download(access_token, scoreID)
-    except:
-        print(fg.red + "error:", fg.yellow + "couldn't download the replay" + fg.rs)
-        continue
-    print(fg.green + "got the replay for score", fg.blue + scoreID + fg.rs)
+        print(fg.green + "new scorepost:", fg.blue + submission.title + fg.rs)
+        try:
+            parsed = utils.parse_submission(submission.title)
+            scoreID, access_token = utils.find_score(parsed)
+        except Exception as e:
+            print(fg.red + "error:", e)
+            continue
+        print(fg.green + "found the score:", fg.blue + scoreID + fg.rs)
 
-    # post the replay to o!rdr
-    try:
-        renderID = utils.ordr_post(replay)
-    except:
-        print(fg.red + "error:", fg.yellow + "could't post the replay to o!rdr" + fg.rs)
-        continue
-    print(fg.green + "posted the replay to o!rdr, renderID:", fg.blue + str(renderID) + fg.rs)
+        # download the replay
+        try:
+            replay = utils.replay_download(access_token, scoreID)
+        except:
+            print(fg.red + "error:", fg.yellow + "couldn't download the replay" + fg.rs)
+            continue
+        print(fg.green + "got the replay for score", fg.blue + scoreID + fg.rs)
 
-    # add to render queue
-    queue.append({"id": renderID, "sub": submission, "parsed": parsed})
+        # post the replay to o!rdr
+        try:
+            renderID = utils.ordr_post(replay)
+        except:
+            print(fg.red + "error:", fg.yellow + "could't post the replay to o!rdr" + fg.rs)
+            continue
+        print(fg.green + "posted the replay to o!rdr, renderID:", fg.blue + str(renderID) + fg.rs)
+
+        # add to render queue
+        queue.append({"id": renderID, "sub": submission, "parsed": parsed})
