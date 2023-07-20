@@ -2,6 +2,7 @@ import os
 import praw
 import utils
 import socketio
+import re
 from sty import fg
 from dotenv import load_dotenv
 
@@ -45,10 +46,10 @@ def done(msg):
         queueSearch[0]["sub"].reply(
             "[{username} | {artist} - {title} \[{difficulty}\] {accuracy}%]({link})\n\n----\n\n^(replay provided by [o!rdr](https://ordr.issou.best/))\n\n^(this comment is automated, dm me if I got something wrong)".format(
                 link=msg["videoUrl"],
-                username=parsed["username"],
-                artist=parsed["artist"],
-                title=parsed["title"],
-                difficulty=parsed["difficulty"],
+                username=re.escape(parsed["username"]),
+                artist=re.escape(parsed["artist"]),
+                title=re.escape(parsed["title"]),
+                difficulty=re.escape(parsed["difficulty"]),
                 accuracy=parsed["accuracy"],
             )
         )
