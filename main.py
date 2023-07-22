@@ -45,13 +45,8 @@ def done(msg):
     parsed = queueSearch[0]["parsed"]
     try:
         queueSearch[0]["sub"].reply(
-            "[{username} | {artist} - {title} \[{difficulty}\] {accuracy}%]({link})\n\n----\n\n^(replay provided by [o!rdr](https://ordr.issou.best/))\n\n^(this comment is automated, dm me if I got something wrong)".format(
-                link=msg["videoUrl"],
-                username=parsed["username"].translate(translate_table),
-                artist=parsed["artist"].translate(translate_table),
-                title=parsed["title"].translate(translate_table),
-                difficulty=parsed["difficulty"].translate(translate_table),
-                accuracy=parsed["accuracy"],
+            "[replay for score {scoreID}]({link})\n\n----\n\n^(replay provided by [o!rdr](https://ordr.issou.best/))\n\n^(this comment is automated, dm me if I got something wrong)".format(
+                link=msg["videoUrl"], scoreID=parsed["scoreID"]
             )
         )
     except:
@@ -83,6 +78,7 @@ while True:
         try:
             parsed = utils.parse_submission(submission.title)
             scoreID, access_token = utils.find_score(parsed)
+            parsed["scoreID"] = scoreID
         except Exception as e:
             print(fg.red + "error:", e)
             continue
