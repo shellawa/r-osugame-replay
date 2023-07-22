@@ -45,7 +45,7 @@ def done(msg):
     parsed = queueSearch[0]["parsed"]
     try:
         queueSearch[0]["sub"].reply(
-            "[replay for score {scoreID}]({link})\n\n----\n\n^(replay provided by [o!rdr](https://ordr.issou.best/))\n\n^(this comment is automated, dm me if I got something wrong)".format(
+            "[replay for score {scoreID}]({link})\n\n----\n\n^(rendered by [o!rdr](https://ordr.issou.best/))\n\n^(this comment is automated, dm me if I got something wrong)".format(
                 link=msg["videoUrl"], scoreID=parsed["scoreID"]
             )
         )
