@@ -114,6 +114,8 @@ def ordr_post(replay):
             "showHitCounter": "true",
             "showAimErrorMeter": "true",
             "showScoreboard": "true",
+            "showStrainGraph": "true",
+            "showSliderBreaks": "true",
             "verificationKey": os.environ["RENDER_API_KEY"],
         },
         files={"replayFile": ("replay.osr", replay)},
