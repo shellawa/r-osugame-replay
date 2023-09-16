@@ -11,7 +11,7 @@ sio = socketio.Client()
 
 @sio.event
 def connect():
-    print(fg.green + "ws connection established" + fg.rs)
+    print(fg.green + "WebSocket connection established" + fg.rs)
 
 
 sio.connect("https://ordr-ws.issou.best")
@@ -29,76 +29,79 @@ print(fg.green + "Logged in to", fg.blue + str(reddit.user.me()) + fg.rs)
 
 subreddit = reddit.subreddit(os.environ["SUBREDDIT"])
 
-queue = []
+scorepost_cues = ["|", "-", "[", "]"]
 
-translate_table = str.maketrans({"[": r"\[", "]": r"\]", "(": r"\(", ")": r"\)"})
+score_list = []
 
 
-# listening to ws events
 @sio.on("render_done_json")
 def done(msg):
-    global queue
-    queueSearch = [x for x in queue if x["id"] == msg["renderID"]]
-    if queueSearch == []:
+    global score_list
+    score_search = [score for score in score_list if score["renderID"] == msg["renderID"]]
+    if score_search == []:
         return
-    queue = [x for x in queue if x["id"] != msg["renderID"]]
-    parsed = queueSearch[0]["parsed"]
-    try:
-        queueSearch[0]["sub"].reply(
-            "[replay for score {scoreID}]({link})\n\n----\n\n^(rendered by [o!rdr](https://ordr.issou.best/))\n\n^(this comment is automated, dm me if I got something wrong)".format(
-                link=msg["videoUrl"], scoreID=parsed["scoreID"]
-            )
-        )
-    except:
-        print(fg.red + "error trying to reply to the submission" + fg.rs)
-        return
-    print(fg.green + "replied to the post" + fg.rs)
+    score_list = [score for score in score_list if score["renderID"] != msg["renderID"]]
+    score = score_search[0]
+    score["videoUrl"] = msg["videoUrl"]
+    utils.reply(score)
+    score["submissions"] = []
+    score_list.append(score)
 
 
 @sio.on("render_failed_json")
 def failed(msg):
-    global queue
-    queueSearch = [x for x in queue if x["id"] == msg["renderID"]]
-    if queueSearch == []:
+    global score_list
+    score_search = [score for score in score_list if score["renderID"] == msg["renderID"]]
+    if score_search == []:
         return
-    queue = [x for x in queue if x["id"] != msg["renderID"]]
-    print(fg.red + "render failed:", fg.yellow, str(queueSearch[0]["id"]) + fg.rs)
-
-
-cues = ["|", "-", "[", "]"]
+    score_list = [score for score in score_list if score["renderID"] != msg["renderID"]]
+    print(fg.red + "Render failed:" + fg.yellow, score["renderID"], fg.rs)
 
 
 while True:
     for submission in subreddit.stream.submissions(skip_existing=True):
-        # try to ignore other posts than scoreposts
-        if not all([cue in submission.title for cue in cues]):
+        if not all([cue in submission.title for cue in scorepost_cues]):
             continue
+        print(fg.green + "New scorepost:", fg.blue + submission.title + fg.rs)
 
-        print(fg.green + "new scorepost:", fg.blue + submission.title + fg.rs)
+        score = {}
+
         try:
-            parsed = utils.parse_submission(submission.title)
-            scoreID, access_token = utils.find_score(parsed)
-            parsed["scoreID"] = scoreID
+            score["parsed"] = utils.parse_submission(submission.title)
+            score["scoreID"], access_token = utils.find_score(score["parsed"])
         except Exception as e:
-            print(fg.red + "error:", e)
+            print(fg.red + "Error:", e)
             continue
-        print(fg.green + "found the score:", fg.blue + scoreID + fg.rs)
+        print(fg.green + "Found the score:", fg.blue + score["scoreID"] + fg.rs)
 
-        # download the replay
+        is_duplicated = False
+        for idx, duplicated in enumerate(score_list):
+            if duplicated["scoreID"] == score["scoreID"]:
+                if duplicated.get("videoUrl") == None:
+                    print(fg.yellow + "Duplicated with a rendering score" + fg.rs)
+                    score_list[idx]["submissions"].append(submission)
+                else:
+                    print(fg.yellow + "Duplicated with a rendered score" + fg.rs)
+                    duplicated["submissions"].append(submission)
+                    utils.reply(duplicated)
+                is_duplicated = True
+                break
+        if is_duplicated:
+            continue
+
         try:
-            replay = utils.replay_download(access_token, scoreID)
+            replay = utils.replay_download(access_token, score["scoreID"])
         except:
-            print(fg.red + "error:", fg.yellow + "couldn't download the replay" + fg.rs)
+            print(fg.red + "Error:", fg.yellow + "couldn't download the replay" + fg.rs)
             continue
-        print(fg.green + "got the replay for score", fg.blue + scoreID + fg.rs)
+        print(fg.green + "Got the replay for score", fg.blue + score["scoreID"] + fg.rs)
 
-        # post the replay to o!rdr
         try:
-            renderID = utils.ordr_post(replay)
+            score["renderID"] = utils.ordr_post(replay)
         except:
-            print(fg.red + "error:", fg.yellow + "could't post the replay to o!rdr" + fg.rs)
+            print(fg.red + "Error:", fg.yellow + "could't post the replay to o!rdr" + fg.rs)
             continue
-        print(fg.green + "posted the replay to o!rdr, renderID:", fg.blue + str(renderID) + fg.rs)
+        print(fg.green + "Posted the replay to o!rdr, renderID:", fg.blue + str(score["renderID"]) + fg.rs)
 
-        # add to render queue
-        queue.append({"id": renderID, "sub": submission, "parsed": parsed})
+        score["submissions"] = [submission]
+        score_list.append(score)

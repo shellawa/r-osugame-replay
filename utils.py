@@ -44,7 +44,7 @@ def find_score(parsed):
     access_token = get_access_token()
     if not access_token:
         raise Exception(fg.yellow + "couldn't get access token" + fg.rs)
-    print(fg.green + "got access token" + fg.rs)
+    print(fg.green + "Got access token" + fg.rs)
     try:
         userID = requests.get(
             "https://osu.ppy.sh/api/v2/users/" + parsed["username"] + "/osu?key=username",
@@ -121,3 +121,16 @@ def ordr_post(replay):
         files={"replayFile": ("replay.osr", replay)},
     ).json()
     return res["renderID"]
+
+
+def reply(score):
+    for submission in score["submissions"]:
+        try:
+            submission.reply(
+                "[replay for score {scoreID}]({videoUrl})\n\n----\n\n^(rendered by [o!rdr](https://ordr.issou.best/))\n\n^(this comment is automated, dm me if I got something wrong)".format(
+                    videoUrl=score["videoUrl"], scoreID=score["scoreID"]
+                )
+            )
+        except:
+            print(fg.red + "Error: " + fg.yellow + "could't reply to the post" + fg.rs)
+        print(fg.green + "Replied to the post" + fg.rs)
