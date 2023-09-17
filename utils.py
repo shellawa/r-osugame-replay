@@ -59,7 +59,7 @@ def find_score(parsed):
     ).json()
 
     filtered = [
-        score["best_id"]
+        score
         for score in scores
         if score["replay"] == True
         and score["beatmapset"]["title"] == parsed["title"]
@@ -69,7 +69,7 @@ def find_score(parsed):
     ]
     if len(filtered) > 1 or len(filtered) == 0:
         raise Exception(fg.yellow + "couldn't find the exact score or the replay isn't available" + fg.rs)
-    return str(filtered[0]), access_token
+    return filtered[0], access_token
 
 
 def get_access_token():  # using lazer access token as it doesn't require user input
@@ -103,21 +103,32 @@ def replay_download(access_token, scoreID):
     return res.content
 
 
-def ordr_post(replay):
+def ordr_post(replay, scoreInfo):
+    config = {
+        "username": os.environ["RENDER_USERNAME"],
+        "resolution": "1280x720",
+        "inGameBGDim": "90",
+        "showHitCounter": "true",
+        "showAimErrorMeter": "true",
+        "showScoreboard": "true",
+        "showStrainGraph": "true",
+        "showSliderBreaks": "true",
+        "verificationKey": os.environ["RENDER_API_KEY"],
+    }
+
+    if "EZ" in scoreInfo["mods"]:
+        config.update({"customSkin": "true", "skin": "11704", "useBeatmapColors": "false", "useSkinColors": "true"})
+        print(fg.blue + "Using EZ skin" + fg.rs)
+    elif ("DT" in scoreInfo["mods"] or "NC" in scoreInfo["mods"]) and scoreInfo["beatmap"]["ar"] >= 9.0:
+        config.update({"customSkin": "true", "skin": "11683", "useBeatmapColors": "false", "useSkinColors": "true"})
+        print(fg.blue + "Using DT skin" + fg.rs)
+    else:
+        config.update({"skin": "FreedomDiveBTMC"})
+        print(fg.blue + "Using NM skin" + fg.rs)
+
     res = requests.post(
         "https://apis.issou.best/ordr/renders",
-        data={
-            "username": os.environ["RENDER_USERNAME"],
-            "resolution": "1280x720",
-            "skin": "FreedomDiveBTMC",
-            "inGameBGDim": "90",
-            "showHitCounter": "true",
-            "showAimErrorMeter": "true",
-            "showScoreboard": "true",
-            "showStrainGraph": "true",
-            "showSliderBreaks": "true",
-            "verificationKey": os.environ["RENDER_API_KEY"],
-        },
+        data=config,
         files={"replayFile": ("replay.osr", replay)},
     ).json()
     return res["renderID"]
@@ -128,9 +139,10 @@ def reply(score):
         try:
             submission.reply(
                 "[replay for score {scoreID}]({videoUrl})\n\n----\n\n^(rendered by [o!rdr](https://ordr.issou.best/))\n\n^(this comment is automated, dm me if I got something wrong)".format(
-                    videoUrl=score["videoUrl"], scoreID=score["scoreID"]
+                    videoUrl=score["videoUrl"], scoreID=score["scoreInfo"]["best_id"]
                 )
             )
         except:
             print(fg.red + "Error: " + fg.yellow + "could't reply to the post" + fg.rs)
+            return
         print(fg.green + "Replied to the post" + fg.rs)

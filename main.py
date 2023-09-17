@@ -68,15 +68,15 @@ while True:
 
         try:
             score["parsed"] = utils.parse_submission(submission.title)
-            score["scoreID"], access_token = utils.find_score(score["parsed"])
+            score["scoreInfo"], access_token = utils.find_score(score["parsed"])
         except Exception as e:
             print(fg.red + "Error:", e)
             continue
-        print(fg.green + "Found the score:", fg.blue + score["scoreID"] + fg.rs)
+        print(fg.green + "Found the score:", fg.blue + str(score["scoreInfo"]["best_id"]) + fg.rs)
 
         is_duplicated = False
         for idx, duplicated in enumerate(score_list):
-            if duplicated["scoreID"] == score["scoreID"]:
+            if duplicated["scoreInfo"]["best_id"] == str(score["scoreInfo"]["best_id"]):
                 if duplicated.get("videoUrl") == None:
                     print(fg.yellow + "Duplicated with a rendering score" + fg.rs)
                     score_list[idx]["submissions"].append(submission)
@@ -90,16 +90,16 @@ while True:
             continue
 
         try:
-            replay = utils.replay_download(access_token, score["scoreID"])
+            replay = utils.replay_download(access_token, str(score["scoreInfo"]["best_id"]))
         except:
             print(fg.red + "Error:", fg.yellow + "couldn't download the replay" + fg.rs)
             continue
-        print(fg.green + "Got the replay for score", fg.blue + score["scoreID"] + fg.rs)
+        print(fg.green + "Got the replay for score", fg.blue + str(score["scoreInfo"]["best_id"]) + fg.rs)
 
         try:
-            score["renderID"] = utils.ordr_post(replay)
+            score["renderID"] = utils.ordr_post(replay, score["scoreInfo"])
         except:
-            print(fg.red + "Error:", fg.yellow + "could't post the replay to o!rdr" + fg.rs)
+            print(fg.red + "Error:", fg.yellow + "couldn't post the replay to o!rdr" + fg.rs)
             continue
         print(fg.green + "Posted the replay to o!rdr, renderID:", fg.blue + str(score["renderID"]) + fg.rs)
 
