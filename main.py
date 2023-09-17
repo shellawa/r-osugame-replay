@@ -76,7 +76,7 @@ while True:
 
         is_duplicated = False
         for idx, duplicated in enumerate(score_list):
-            if duplicated["scoreInfo"]["best_id"] == str(score["scoreInfo"]["best_id"]):
+            if duplicated["scoreInfo"]["best_id"] == score["scoreInfo"]["best_id"]:
                 if duplicated.get("videoUrl") == None:
                     print(fg.yellow + "Duplicated with a rendering score" + fg.rs)
                     score_list[idx]["submissions"].append(submission)
@@ -90,7 +90,7 @@ while True:
             continue
 
         try:
-            replay = utils.replay_download(access_token, str(score["scoreInfo"]["best_id"]))
+            replay = utils.replay_download(access_token, score["scoreInfo"]["best_id"])
         except:
             print(fg.red + "Error:", fg.yellow + "couldn't download the replay" + fg.rs)
             continue
