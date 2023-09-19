@@ -17,10 +17,13 @@ def log(*args, **kwargs):
     print(*args, **kwargs)
     if "WEBHOOK_LINK" in os.environ:
         normalized = re.sub(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])", "", " ".join(str(x) for x in args)).strip()
-        requests.post(
-            os.environ["WEBHOOK_LINK"],
-            json={"content": normalized, "username": "allehS"},
-        )
+        try:
+            requests.post(
+                os.environ["WEBHOOK_LINK"],
+                json={"content": normalized, "username": "allehS"},
+            )
+        except Exception:
+            pass
 
 
 def parse_submission(subTitle):
