@@ -13,6 +13,16 @@ re_accuracy = re.compile("\d+(?:\.\d+)?%")
 re_ss = re.compile(" ss ", re.IGNORECASE)
 
 
+def log(*args, **kwargs):
+    print(*args, **kwargs)
+    if "WEBHOOK_LINK" in os.environ:
+        normalized = re.sub(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])", "", " ".join(str(x) for x in args)).strip()
+        requests.post(
+            os.environ["WEBHOOK_LINK"],
+            json={"content": normalized, "username": "allehS"},
+        )
+
+
 def parse_submission(subTitle):
     username = re.search(re_username, subTitle)
     if not username:
@@ -44,7 +54,7 @@ def find_score(parsed):
     access_token = get_access_token()
     if not access_token:
         raise Exception(fg.yellow + "couldn't get access token" + fg.rs)
-    print(fg.green + "Got access token" + fg.rs)
+    log(fg.green + "Got access token" + fg.rs)
     try:
         userID = requests.get(
             "https://osu.ppy.sh/api/v2/users/" + parsed["username"] + "/osu?key=username",
@@ -118,13 +128,13 @@ def ordr_post(replay, scoreInfo):
 
     if "EZ" in scoreInfo["mods"]:
         config.update({"customSkin": "true", "skin": "11704", "useBeatmapColors": "false", "useSkinColors": "true"})
-        print(fg.blue + "Using EZ skin" + fg.rs)
+        log(fg.blue + "Using EZ skin" + fg.rs)
     elif ("DT" in scoreInfo["mods"] or "NC" in scoreInfo["mods"]) and scoreInfo["beatmap"]["ar"] >= 9.0:
         config.update({"customSkin": "true", "skin": "11683", "useBeatmapColors": "false", "useSkinColors": "true"})
-        print(fg.blue + "Using DT skin" + fg.rs)
+        log(fg.blue + "Using DT skin" + fg.rs)
     else:
         config.update({"skin": "FreedomDiveBTMC"})
-        print(fg.blue + "Using NM skin" + fg.rs)
+        log(fg.blue + "Using NM skin" + fg.rs)
 
     res = requests.post(
         "https://apis.issou.best/ordr/renders",
@@ -143,6 +153,6 @@ def reply(score):
                 )
             )
         except:
-            print(fg.red + "Error: " + fg.yellow + "could't reply to the post" + fg.rs)
+            log(fg.red + "Error: " + fg.yellow + "could't reply to the post" + fg.rs)
             return
-        print(fg.green + "Replied to the post" + fg.rs)
+        log(fg.green + "Replied to the post" + fg.rs)
