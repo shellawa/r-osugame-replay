@@ -15,6 +15,16 @@ def connect():
     log(fg.green + "WebSocket connection established" + fg.rs)
 
 
+@sio.event
+def disconnect():
+    print(fg.yellow + "Disconnected from WebSocket" + fg.rs)
+
+
+@sio.event
+def connect_error(data):
+    print(fg.red + "The connection failed!" + fg.rs)
+
+
 sio.connect("https://ordr-ws.issou.best")
 
 
