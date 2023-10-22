@@ -13,7 +13,7 @@ RUN echo '#!/bin/sh' > restart_script.sh \
     && echo '    python main.py &' >> restart_script.sh \
     && echo '    pid="$!"' >> restart_script.sh \
     && echo '    echo "Python script started with PID $pid."' >> restart_script.sh \
-    && echo '    sleep 1800' >> restart_script.sh \
+    && echo '    sleep 3600' >> restart_script.sh \
     && echo 'done' >> restart_script.sh \
     && chmod +x restart_script.sh
 
