@@ -1,4 +1,4 @@
-name: Fly.io Deploy
+name: Fly.io Deployment
 on:
   push:
     branches:
