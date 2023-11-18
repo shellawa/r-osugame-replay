@@ -21,7 +21,7 @@ def disconnect():
 
 
 @sio.event
-def connect_error(data):
+def connect_error():
     log(fg.red + "The connection failed!" + fg.rs)
 
 
