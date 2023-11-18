@@ -158,4 +158,4 @@ def reply(score):
         except:
             log(fg.red + "Error: " + fg.yellow + "could't reply to the post" + fg.rs)
             return
-        log(fg.green + "Replied to the post" + fg.rs)
+        log(fg.green + "Replied to " + submission.id + fg.rs)

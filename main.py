@@ -73,7 +73,7 @@ while True:
     for submission in subreddit.stream.submissions(skip_existing=True):
         if not all([cue in submission.title for cue in scorepost_cues]):
             continue
-        log(fg.green + "New scorepost:", fg.blue + submission.title + fg.rs)
+        log(fg.green + "New scorepost (" + submission.id + "): " + fg.blue + submission.title + fg.rs)
 
         score = {}
 
