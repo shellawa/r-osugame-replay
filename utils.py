@@ -44,7 +44,7 @@ def parse_submission(subTitle):
         raise Exception(fg.yellow + "couldn't parse accuracy" + fg.rs)
 
     parsed = {
-        "username": username.group().strip(),
+        "username": username.group().split("(")[0].strip(),
         "artist": artist.group().strip(),
         "title": title.group().strip(),
         "difficulty": difficulty.group().strip(),
