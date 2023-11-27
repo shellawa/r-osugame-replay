@@ -4,13 +4,13 @@ import os
 import requests
 import re
 
-re_username = re.compile("^[^|]*")
-re_artist = re.compile("(?<= \| )(.*?)(?= \- )")
-re_title = re.compile("(?<= \- )(.*?)(?=\[)")
-re_difficulty = re.compile("(?<=\[)(.*?)(?=\])")
-re_creator = re.compile("(?<=] \()(.*?)(?=,|\|)")
-re_accuracy = re.compile("\d+(?:\.\d+)?%")
-re_ss = re.compile(" ss ", re.IGNORECASE)
+re_username = re.compile(r"^[^|]*")
+re_artist = re.compile(r"(?<= \| )(.*?)(?= \- )")
+re_title = re.compile(r"(?<= \- )(.*?)(?=\[)")
+re_difficulty = re.compile(r"(?<=\[)(.*?)(?=\])")
+re_creator = re.compile(r"(?<=] \()(.*?)(?=,|\|)")
+re_accuracy = re.compile(r"\d+(?:\.\d+)?%")
+re_ss = re.compile(r" ss ", re.IGNORECASE)
 
 
 def log(*args, **kwargs):
