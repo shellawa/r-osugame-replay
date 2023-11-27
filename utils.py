@@ -151,8 +151,11 @@ def reply(score):
     for submission in score["submissions"]:
         try:
             submission.reply(
-                "[replay for score {scoreID}]({videoUrl})\n\n----\n\n^(rendered by [o!rdr](https://ordr.issou.best/))\n\n^(this comment is automated, dm me if I got something wrong)".format(
-                    videoUrl=score["videoUrl"], scoreID=score["scoreInfo"]["best_id"]
+                "[**replay**]({videoUrl})\n\n---\n  ^(rendered by [o!rdr](https://ordr.issou.best/) | [Report issues](https://www.reddit.com/message/compose?to=u/allehS&subject={submission_id}:{score_id}:{render_id}) | [Source](https://github.com/shellawa/r-osugame-replay))".format(
+                    videoUrl=score["videoUrl"],
+                    submission_id=submission.id,
+                    score_id=score["scoreInfo"]["best_id"],
+                    render_id=score["videoUrl"].split("/")[-1],
                 )
             )
         except:
