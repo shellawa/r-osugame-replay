@@ -79,15 +79,15 @@ while True:
 
         try:
             score["parsed"] = utils.parse_submission(submission.title)
-            score["scoreInfo"], access_token = utils.find_score(score["parsed"])
+            score["score_info"], access_token = utils.find_score(score["parsed"])
         except Exception as e:
             log(fg.red + "Error:", e)
             continue
-        log(fg.green + "Found the score:", fg.blue + str(score["scoreInfo"]["best_id"]) + fg.rs)
+        log(fg.green + "Found the score:", fg.blue + str(score["score_info"]["best_id"]) + fg.rs)
 
         is_duplicated = False
         for idx, duplicated in enumerate(score_list):
-            if duplicated["scoreInfo"]["best_id"] == score["scoreInfo"]["best_id"]:
+            if duplicated["score_info"]["best_id"] == score["score_info"]["best_id"]:
                 if duplicated.get("videoUrl") == None:
                     log(fg.yellow + "Duplicated with a rendering score" + fg.rs)
                     score_list[idx]["submissions"].append(submission)
@@ -101,14 +101,14 @@ while True:
             continue
 
         try:
-            replay = utils.replay_download(access_token, score["scoreInfo"]["best_id"])
+            replay = utils.replay_download(access_token, score["score_info"]["best_id"])
         except:
             log(fg.red + "Error:", fg.yellow + "couldn't download the replay" + fg.rs)
             continue
-        log(fg.green + "Got the replay for score", fg.blue + str(score["scoreInfo"]["best_id"]) + fg.rs)
+        log(fg.green + "Got the replay for score", fg.blue + str(score["score_info"]["best_id"]) + fg.rs)
 
         try:
-            score["renderID"] = utils.ordr_post(replay, score["scoreInfo"])
+            score["renderID"] = utils.ordr_post(replay, score["score_info"])
         except:
             log(fg.red + "Error:", fg.yellow + "couldn't post the replay to o!rdr" + fg.rs)
             continue

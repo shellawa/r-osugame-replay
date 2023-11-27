@@ -116,7 +116,7 @@ def replay_download(access_token, scoreID):
     return res.content
 
 
-def ordr_post(replay, scoreInfo):
+def ordr_post(replay, score_info):
     config = {
         "username": os.environ["RENDER_USERNAME"],
         "resolution": "1280x720",
@@ -129,10 +129,10 @@ def ordr_post(replay, scoreInfo):
         "verificationKey": os.environ["RENDER_API_KEY"],
     }
 
-    if "EZ" in scoreInfo["mods"]:
+    if "EZ" in score_info["mods"]:
         config.update({"customSkin": "true", "skin": "11704", "useBeatmapColors": "false", "useSkinColors": "true"})
         log(fg.blue + "Using EZ skin" + fg.rs)
-    elif ("DT" in scoreInfo["mods"] or "NC" in scoreInfo["mods"]) and scoreInfo["beatmap"]["ar"] >= 9.0:
+    elif ("DT" in score_info["mods"] or "NC" in score_info["mods"]) and score_info["beatmap"]["ar"] >= 9.0:
         config.update({"customSkin": "true", "skin": "11683", "useBeatmapColors": "false", "useSkinColors": "true"})
         log(fg.blue + "Using DT skin" + fg.rs)
     else:
@@ -154,7 +154,7 @@ def reply(score):
                 "[**replay**]({videoUrl})\n\n---\n  ^(rendered by [o!rdr](https://ordr.issou.best/) | [Report issues](https://www.reddit.com/message/compose?to=u/allehS&subject={submission_id}:{score_id}:{render_id}) | [Source](https://github.com/shellawa/r-osugame-replay))".format(
                     videoUrl=score["videoUrl"],
                     submission_id=submission.id,
-                    score_id=score["scoreInfo"]["best_id"],
+                    score_id=score["score_info"]["best_id"],
                     render_id=score["videoUrl"].split("/")[-1],
                 )
             )
