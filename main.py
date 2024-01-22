@@ -25,7 +25,7 @@ def connect_error():
     log(fg.red + "The connection failed!" + fg.rs)
 
 
-sio.connect("https://ordr-ws.issou.best")
+sio.connect("https://apis.issou.best/", socketio_path="/ordr/ws")
 
 
 reddit = praw.Reddit(
@@ -48,25 +48,23 @@ score_list = []
 @sio.on("render_done_json")
 def done(msg):
     global score_list
-    score_search = [score for score in score_list if score["renderID"] == msg["renderID"]]
+    score_search = [score for score in score_list if score["renderID"] == int(msg["renderID"])]
     if score_search == []:
         return
-    score_list = [score for score in score_list if score["renderID"] != msg["renderID"]]
     score = score_search[0]
     score["videoUrl"] = msg["videoUrl"]
     utils.reply(score)
     score["submissions"] = []
-    score_list.append(score)
 
 
 @sio.on("render_failed_json")
 def failed(msg):
     global score_list
-    score_search = [score for score in score_list if score["renderID"] == msg["renderID"]]
+    score_search = [score for score in score_list if score["renderID"] == int(msg["renderID"])]
     if score_search == []:
         return
-    score_list = [score for score in score_list if score["renderID"] != msg["renderID"]]
-    log(fg.red + "Render failed:" + fg.yellow, score["renderID"], fg.rs)
+    score_list.remove(score_search[0])
+    log(fg.red + "Render failed:" + fg.yellow, msg["renderID"], fg.rs)
 
 
 while True:
@@ -86,16 +84,16 @@ while True:
         log(fg.green + "Found the score:", fg.blue + str(score["score_info"]["best_id"]) + fg.rs)
 
         is_duplicated = False
-        for idx, duplicated in enumerate(score_list):
-            if duplicated["score_info"]["best_id"] == score["score_info"]["best_id"]:
-                if duplicated.get("videoUrl") == None:
+        for listed_score in score_list:
+            if listed_score["score_info"]["best_id"] == score["score_info"]["best_id"]:
+                is_duplicated = True
+                listed_score["submissions"].append(submission)
+                if listed_score.get("videoUrl") == None:
                     log(fg.yellow + "Duplicated with a rendering score" + fg.rs)
-                    score_list[idx]["submissions"].append(submission)
                 else:
                     log(fg.yellow + "Duplicated with a rendered score" + fg.rs)
-                    duplicated["submissions"].append(submission)
-                    utils.reply(duplicated)
-                is_duplicated = True
+                    utils.reply(listed_score)
+                    listed_score["submissions"] = []
                 break
         if is_duplicated:
             continue
