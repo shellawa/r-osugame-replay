@@ -81,11 +81,11 @@ while True:
         except Exception as e:
             log(fg.red + "Error:", e)
             continue
-        log(fg.green + "Found the score:", fg.blue + str(score["score_info"]["best_id"]) + fg.rs)
+        log(fg.green + "Found the score:", fg.blue + str(score["score_info"]["id"]) + fg.rs)
 
         is_duplicated = False
         for listed_score in score_list:
-            if listed_score["score_info"]["best_id"] == score["score_info"]["best_id"]:
+            if listed_score["score_info"]["id"] == score["score_info"]["id"]:
                 is_duplicated = True
                 listed_score["submissions"].append(submission)
                 if listed_score.get("videoUrl") == None:
@@ -99,11 +99,11 @@ while True:
             continue
 
         try:
-            replay = utils.replay_download(access_token, score["score_info"]["best_id"])
+            replay = utils.replay_download(access_token, score["score_info"]["id"])
         except:
             log(fg.red + "Error:", fg.yellow + "couldn't download the replay" + fg.rs)
             continue
-        log(fg.green + "Got the replay for score", fg.blue + str(score["score_info"]["best_id"]) + fg.rs)
+        log(fg.green + "Got the replay for score", fg.blue + str(score["score_info"]["id"]) + fg.rs)
 
         try:
             score["renderID"] = utils.ordr_post(replay, score["score_info"])

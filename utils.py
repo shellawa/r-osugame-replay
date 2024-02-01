@@ -74,14 +74,13 @@ def find_score(parsed):
     filtered = [
         score
         for score in scores
-        if score["replay"] == True
-        and score["beatmapset"]["title"] == parsed["title"]
+        if score["beatmapset"]["title"] == parsed["title"]
         and score["beatmapset"]["artist"] == parsed["artist"]
         and score["beatmap"]["version"] == parsed["difficulty"]
         and round(score["accuracy"] * 100, 2) == float(parsed["accuracy"])
     ]
     if len(filtered) > 1 or len(filtered) == 0:
-        raise Exception(fg.yellow + "couldn't find the exact score or the replay isn't available" + fg.rs)
+        raise Exception(fg.yellow + "couldn't find the exact score" + fg.rs)
     return filtered[0], access_token
 
 
@@ -106,7 +105,7 @@ def get_access_token():  # using lazer access token as it doesn't require user i
 
 def replay_download(access_token, score_id):
     res = requests.get(
-        "https://osu.ppy.sh/api/v2/scores/osu/" + str(score_id) + "/download",
+        "https://osu.ppy.sh/api/v2/scores/" + str(score_id) + "/download",
         headers={
             "Accept": "application/octet-stream",
             "Content-Type": "application/octet-stream",
@@ -154,7 +153,7 @@ def reply(score):
                 "[**replay**]({videoUrl})\n\n---\n  ^(rendered by [o!rdr](https://ordr.issou.best/) | [Report issues](https://www.reddit.com/message/compose?to=u/allehS&subject={submission_id}:{score_id}:{render_id}) | [Source](https://github.com/shellawa/r-osugame-replay))".format(
                     videoUrl=score["videoUrl"],
                     submission_id=submission.id,
-                    score_id=score["score_info"]["best_id"],
+                    score_id=score["score_info"]["id"],
                     render_id=score["videoUrl"].split("/")[-1],
                 )
             )
