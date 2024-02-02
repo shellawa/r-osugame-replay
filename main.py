@@ -99,7 +99,7 @@ while True:
             continue
 
         try:
-            replay = utils.replay_download(access_token, score["score_info"]["id"])
+            replay = utils.replay_download(access_token, score["score_info"])
         except:
             log(fg.red + "Error:", fg.yellow + "couldn't download the replay" + fg.rs)
             continue

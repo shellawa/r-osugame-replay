@@ -103,9 +103,12 @@ def get_access_token():  # using lazer access token as it doesn't require user i
     return os.environ["BANCHO_ACCESS_TOKEN"]
 
 
-def replay_download(access_token, score_id):
+def replay_download(access_token, score):
+    base_url = "https://osu.ppy.sh/api/v2/scores/"
+    if score["type"] == "score_osu":
+        base_url += "osu/"
     res = requests.get(
-        "https://osu.ppy.sh/api/v2/scores/" + str(score_id) + "/download",
+        base_url + str(score["id"]) + "/download",
         headers={
             "Accept": "application/octet-stream",
             "Content-Type": "application/octet-stream",
