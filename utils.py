@@ -74,7 +74,8 @@ def find_score(parsed):
     filtered = [
         score
         for score in scores
-        if score["beatmapset"]["title"] == parsed["title"]
+        if score["id"] == score["best_id"]
+        and score["beatmapset"]["title"] == parsed["title"]
         and score["beatmapset"]["artist"] == parsed["artist"]
         and score["beatmap"]["version"] == parsed["difficulty"]
         and round(score["accuracy"] * 100, 2) == float(parsed["accuracy"])
@@ -104,8 +105,10 @@ def get_access_token():  # using lazer access token as it doesn't require user i
 
 
 def replay_download(access_token, score):
+    # if score["replay"] == False:
+    #     raise Exception(fg.yellow + "The replay isn't available for score" + fg.blue, score["id"], fg.rs)
     base_url = "https://osu.ppy.sh/api/v2/scores/"
-    if score["type"] == "score_osu":
+    if score["type"] == "score_best_osu":
         base_url += "osu/"
     res = requests.get(
         base_url + str(score["id"]) + "/download",
@@ -115,6 +118,8 @@ def replay_download(access_token, score):
             "Authorization": "Bearer " + access_token,
         },
     )
+    if res.status_code == 404:
+        raise Exception(fg.yellow + "The replay isn't available for score" + fg.blue, score["id"], fg.rs)
     return res.content
 
 
