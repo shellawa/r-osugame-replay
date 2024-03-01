@@ -74,13 +74,13 @@ def find_score(parsed):
     filtered = [
         score
         for score in scores
-        if score["id"] == score["best_id"]
-        and score["beatmapset"]["title"] == parsed["title"]
+        # if score["id"] == score["best_id"]
+        if score["beatmapset"]["title"] == parsed["title"]
         and score["beatmapset"]["artist"] == parsed["artist"]
         and score["beatmap"]["version"] == parsed["difficulty"]
         and round(score["accuracy"] * 100, 2) == float(parsed["accuracy"])
     ]
-    if len(filtered) > 1 or len(filtered) == 0:
+    if len(filtered) != 1:
         raise Exception(fg.yellow + "couldn't find the exact score" + fg.rs)
     return filtered[0], access_token
 
