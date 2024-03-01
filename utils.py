@@ -53,8 +53,7 @@ def parse_submission(subTitle):
     return parsed
 
 
-def find_score(parsed):
-    access_token = get_access_token()
+def find_score(parsed, access_token):
     if not access_token:
         raise Exception(fg.yellow + "couldn't get access token" + fg.rs)
     log(fg.green + "Got access token" + fg.rs)

@@ -77,7 +77,11 @@ while True:
 
         try:
             score["parsed"] = utils.parse_submission(submission.title)
-            score["score_info"], access_token = utils.find_score(score["parsed"])
+            access_token = utils.get_access_token()
+            if not access_token:
+                raise Exception(fg.yellow + "couldn't get access token" + fg.rs)
+            log(fg.green + "Got access token" + fg.rs)
+            score["score_info"] = utils.find_score(score["parsed"], access_token)
         except Exception as e:
             log(fg.red + "Error:", e)
             continue
