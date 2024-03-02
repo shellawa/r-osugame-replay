@@ -54,9 +54,6 @@ def parse_submission(subTitle):
 
 
 def find_score(parsed, access_token):
-    if not access_token:
-        raise Exception(fg.yellow + "couldn't get access token" + fg.rs)
-    log(fg.green + "Got access token" + fg.rs)
     try:
         userID = requests.get(
             "https://osu.ppy.sh/api/v2/users/" + parsed["username"] + "/osu?key=username",
@@ -81,7 +78,7 @@ def find_score(parsed, access_token):
     ]
     if len(filtered) != 1:
         raise Exception(fg.yellow + "couldn't find the exact score" + fg.rs)
-    return filtered[0], access_token
+    return filtered[0]
 
 
 def get_access_token():  # using lazer access token as it doesn't require user input
