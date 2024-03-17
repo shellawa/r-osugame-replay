@@ -1,32 +1,82 @@
 import os
 import praw
-import utils
 import socketio
-from utils import log
-from sty import fg
+from supabase import create_client, ClientOptions
 from dotenv import load_dotenv
+from utils import (
+    log,
+    parse_submission,
+    get_access_token,
+    find_score,
+    replay_download,
+    ordr_post,
+    reply,
+)
 
 load_dotenv()
+
+supabase = create_client(
+    supabase_url=os.environ["SUPABASE_URL"],
+    supabase_key=os.environ["SUPABASE_API_KEY"],
+    options=ClientOptions(
+        postgrest_client_timeout=20,
+    ),
+)
+
 sio = socketio.Client()
 
 
 @sio.event
 def connect():
-    log(fg.green + "WebSocket connection established" + fg.rs)
+    log("WebSocket connection established")
 
 
 @sio.event
 def disconnect():
-    log(fg.yellow + "Disconnected from WebSocket" + fg.rs)
+    log("Disconnected from WebSocket")
 
 
 @sio.event
 def connect_error():
-    log(fg.red + "The connection failed!" + fg.rs)
+    log("The connection failed!")
+
+
+@sio.on("render_done_json")
+def done(msg):
+    score = (
+        supabase.table("scores")
+        .select("*")
+        .eq("render_id", str(msg["renderID"]))
+        .execute()
+        .data
+    )
+    if score == []:
+        return
+    score = (
+        supabase.table("scores")
+        .update({"render_url": msg["videoUrl"]})
+        .eq("score_id", score[0]["score_id"])
+        .execute()
+        .data
+    )
+    scoreposts = (
+        supabase.table("scoreposts")
+        .select("*", "scores(*)")
+        .eq("score_id", score[0]["score_id"])
+        .execute()
+        .data
+    )
+    for scorepost in scoreposts:
+        try:
+            reply(reddit.submission(scorepost["scorepost_id"]), score[0])
+            supabase.table("scoreposts").update({"is_replied": True}).eq(
+                "scorepost_id", scorepost["scorepost_id"]
+            ).execute()
+        except Exception as e:
+            print("Error", e)
 
 
 sio.connect("https://apis.issou.best/", socketio_path="/ordr/ws")
-
 
 reddit = praw.Reddit(
     client_id=os.environ["CLIENT_ID"],
@@ -35,88 +85,54 @@ reddit = praw.Reddit(
     password=os.environ["PASSWORD"],
     user_agent=os.environ["USER_AGENT"],
 )
-
-log(fg.green + "Logged in to", fg.blue + str(reddit.user.me()) + fg.rs)
+log(f"Logged in to {reddit.user.me()}")
 
 subreddit = reddit.subreddit(os.environ["SUBREDDIT"])
 
 scorepost_cues = ["|", "-", "[", "]"]
 
-score_list = []
-
-
-@sio.on("render_done_json")
-def done(msg):
-    global score_list
-    score_search = [score for score in score_list if score["renderID"] == int(msg["renderID"])]
-    if score_search == []:
-        return
-    score = score_search[0]
-    score["videoUrl"] = msg["videoUrl"]
-    utils.reply(score)
-    score["submissions"] = []
-
-
-@sio.on("render_failed_json")
-def failed(msg):
-    global score_list
-    score_search = [score for score in score_list if score["renderID"] == int(msg["renderID"])]
-    if score_search == []:
-        return
-    score_list.remove(score_search[0])
-    log(fg.red + "Render failed:" + fg.yellow, msg["renderID"], fg.rs)
-
-
 while True:
-    for submission in subreddit.stream.submissions(skip_existing=True):
-        if not all([cue in submission.title for cue in scorepost_cues]):
+    for scorepost in subreddit.stream.submissions(skip_existing=True):
+        if not all([cue in scorepost.title for cue in scorepost_cues]):
             continue
-        log(fg.green + "New scorepost (" + submission.id + "): " + fg.blue + submission.title + fg.rs)
-
-        score = {}
+        log(f"New scorepost: ({scorepost.id}): {scorepost.title}")
 
         try:
-            score["parsed"] = utils.parse_submission(submission.title)
-            access_token = utils.get_access_token()
-            if not access_token:
-                raise Exception(fg.yellow + "couldn't get access token" + fg.rs)
-            log(fg.green + "Got access token" + fg.rs)
-            score["score_info"] = utils.find_score(score["parsed"], access_token)
-        except Exception as e:
-            log(fg.red + "Error:", e)
-            continue
-        log(fg.green + "Found the score:", fg.blue + str(score["score_info"]["id"]) + fg.rs)
-
-        is_duplicated = False
-        for listed_score in score_list:
-            if listed_score["score_info"]["id"] == score["score_info"]["id"]:
-                is_duplicated = True
-                listed_score["submissions"].append(submission)
-                if listed_score.get("videoUrl") == None:
-                    log(fg.yellow + "Duplicated with a rendering score" + fg.rs)
+            parsed = parse_submission(scorepost.title)
+            access_token = get_access_token()
+            score_info = find_score(parsed, access_token)
+            log(f"Found the score: {score_info['id']}")
+            stored_score = (
+                supabase.table("scores")
+                .select("*")
+                .eq("score_id", score_info["id"])
+                .execute()
+                .data
+            )
+            if stored_score != []:
+                supabase.table("scoreposts").insert(
+                    {"scorepost_id": scorepost.id, "score_id": score_info["id"]}
+                ).execute()
+                if stored_score[0]["render_url"]:
+                    log("Duplicated with a rendered score")
+                    reply(scorepost, stored_score[0])
+                    supabase.table("scoreposts").update({"is_replied": True}).eq(
+                        "scorepost_id", scorepost.id
+                    ).execute()
                 else:
-                    log(fg.yellow + "Duplicated with a rendered score" + fg.rs)
-                    utils.reply(listed_score)
-                    listed_score["submissions"] = []
-                break
-        if is_duplicated:
-            continue
+                    log("Duplicated with a rendering score")
+                continue
+            replay = replay_download(access_token, score_info)
+            render_id = ordr_post(replay, score_info)
+            log(f"Posted replay of {score_info["id"]} to o!rdr")
 
-        try:
-            replay = utils.replay_download(access_token, score["score_info"])
+            supabase.table("scores").insert(
+                {"score_id": score_info["id"], "render_id": render_id}
+            ).execute()
+            supabase.table("scoreposts").insert(
+                {"scorepost_id": scorepost.id, "score_id": score_info["id"]}
+            ).execute()
+
         except Exception as e:
-            log(fg.red + "Error:", e)
+            log("Error:", e)
             continue
-        except:
-            log(fg.red + "Couldn't download the replay" + fg.rs)
-        log(fg.green + "Got the replay for score", fg.blue + str(score["score_info"]["id"]) + fg.rs)
-
-        try:
-            score["renderID"] = utils.ordr_post(replay, score["score_info"])
-        except:
-            log(fg.red + "Error:", fg.yellow + "couldn't post the replay to o!rdr" + fg.rs)
-            continue
-        log(fg.green + "Posted the replay to o!rdr, renderID:", fg.blue + str(score["renderID"]) + fg.rs)
-
-        score["submissions"] = [submission]
-        score_list.append(score)

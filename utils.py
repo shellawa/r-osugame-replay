@@ -1,5 +1,4 @@
 from time import time
-from sty import fg
 import os
 import requests
 import re
@@ -15,33 +14,33 @@ re_ss = re.compile(r" ss ", re.IGNORECASE)
 
 def log(*args, **kwargs):
     print(*args, **kwargs)
-    if "WEBHOOK_LINK" in os.environ:
-        normalized = re.sub(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])", "", " ".join(str(x) for x in args)).strip()
-        try:
-            requests.post(
-                os.environ["WEBHOOK_LINK"],
-                json={"content": normalized, "username": "allehS"},
-            )
-        except Exception:
-            pass
+    try:
+        requests.post(
+            url=os.environ["WEBHOOK_LINK"],
+            json={"content": args[0], "username": "allehS"},
+        )
+    except Exception:
+        pass
 
 
-def parse_submission(subTitle):
-    username = re.search(re_username, subTitle)
+def parse_submission(submission_title):
+    username = re.search(re_username, submission_title)
     if not username:
-        raise Exception(fg.yellow + "couldn't parse username" + fg.rs)
-    artist = re.search(re_artist, subTitle)
+        raise Exception("couldn't parse username")
+    artist = re.search(re_artist, submission_title)
     if not artist:
-        raise Exception(fg.yellow + "couldn't parse artist" + fg.rs)
-    title = re.search(re_title, subTitle)
+        raise Exception("couldn't parse artist")
+    title = re.search(re_title, submission_title)
     if not title:
-        raise Exception(fg.yellow + "couldn't parse title" + fg.rs)
-    difficulty = re.search(re_difficulty, subTitle)
+        raise Exception("couldn't parse title")
+    difficulty = re.search(
+        re_difficulty, submission_title.replace(username.group(), "")
+    )
     if not difficulty:
-        raise Exception(fg.yellow + "couldn't parse difficulty" + fg.rs)
-    accuracy = re.search(re_accuracy, subTitle.replace(",", "."))
-    if not accuracy and not re.search(re_ss, subTitle):
-        raise Exception(fg.yellow + "couldn't parse accuracy" + fg.rs)
+        raise Exception("couldn't parse difficulty")
+    accuracy = re.search(re_accuracy, submission_title.replace(",", "."))
+    if not accuracy and not re.search(re_ss, submission_title):
+        raise Exception("couldn't parse accuracy")
 
     parsed = {
         "username": username.group().split("(")[0].strip(),
@@ -56,28 +55,28 @@ def parse_submission(subTitle):
 def find_score(parsed, access_token):
     try:
         userID = requests.get(
-            "https://osu.ppy.sh/api/v2/users/" + parsed["username"] + "/osu?key=username",
-            headers={"Authorization": "Bearer " + access_token},
+            url=f"https://osu.ppy.sh/api/v2/users/{parsed['username']}/osu?key=username",
+            headers={"Authorization": f"Bearer {access_token}"},
         ).json()["id"]
-    except:
-        raise Exception(fg.yellow + "couldn't find the player with that username" + fg.rs)
+    except Exception:
+        raise Exception("couldn't find the player with that username")
 
     scores = requests.get(
-        "https://osu.ppy.sh/api/v2/users/" + str(userID) + "/scores/recent?limit=100",
-        headers={"Authorization": "Bearer " + access_token},
+        url=f"https://osu.ppy.sh/api/v2/users/{userID}/scores/recent?limit=100",
+        headers={"Authorization": f"Bearer {access_token}"},
     ).json()
 
     filtered = [
         score
         for score in scores
-        # if score["id"] == score["best_id"]
-        if score["beatmapset"]["title"] == parsed["title"]
+        if score["replay"]
+        and score["beatmapset"]["title"] == parsed["title"]
         and score["beatmapset"]["artist"] == parsed["artist"]
         and score["beatmap"]["version"] == parsed["difficulty"]
         and round(score["accuracy"] * 100, 2) == float(parsed["accuracy"])
     ]
     if len(filtered) != 1:
-        raise Exception(fg.yellow + "couldn't find the exact score" + fg.rs)
+        raise Exception("couldn't find the exact score")
     return filtered[0]
 
 
@@ -101,21 +100,16 @@ def get_access_token():  # using lazer access token as it doesn't require user i
 
 
 def replay_download(access_token, score):
-    # if score["replay"] == False:
-    #     raise Exception(fg.yellow + "The replay isn't available for score" + fg.blue, score["id"], fg.rs)
-    base_url = "https://osu.ppy.sh/api/v2/scores/"
-    if score["type"] == "score_best_osu":
-        base_url += "osu/"
     res = requests.get(
-        base_url + str(score["id"]) + "/download",
+        url=f"https://osu.ppy.sh/api/v2/scores/osu/{score['id']}/download",
         headers={
             "Accept": "application/octet-stream",
             "Content-Type": "application/octet-stream",
-            "Authorization": "Bearer " + access_token,
+            "Authorization": f"Bearer {access_token}",
         },
     )
-    if res.status_code == 404:
-        raise Exception(fg.yellow + "The replay isn't available for score" + fg.blue, score["id"], fg.rs)
+    if res.status_code != 200:
+        raise Exception(f"Couldn't download replay {score['id']}")
     return res.content
 
 
@@ -133,35 +127,48 @@ def ordr_post(replay, score_info):
     }
 
     if "EZ" in score_info["mods"]:
-        config.update({"customSkin": "true", "skin": "11704", "useBeatmapColors": "false", "useSkinColors": "true"})
-        log(fg.blue + "Using EZ skin" + fg.rs)
-    elif ("DT" in score_info["mods"] or "NC" in score_info["mods"]) and score_info["beatmap"]["ar"] >= 9.0:
-        config.update({"customSkin": "true", "skin": "11683", "useBeatmapColors": "false", "useSkinColors": "true"})
-        log(fg.blue + "Using DT skin" + fg.rs)
+        config.update(
+            {
+                "customSkin": "true",
+                "skin": "11704",
+                "useBeatmapColors": "false",
+                "useSkinColors": "true",
+            }
+        )
+        log("Using EZ skin")
+    elif (score_info["beatmap"]["ar"] >= 9.0) and (
+        "DT" in score_info["mods"] or "NC" in score_info["mods"]
+    ):
+        config.update(
+            {
+                "customSkin": "true",
+                "skin": "11683",
+                "useBeatmapColors": "false",
+                "useSkinColors": "true",
+            }
+        )
+        log("Using DT skin")
     else:
         config.update({"skin": "FreedomDiveBTMC"})
-        log(fg.blue + "Using NM skin" + fg.rs)
+        log("Using NM skin")
 
-    res = requests.post(
-        "https://apis.issou.best/ordr/renders",
-        data=config,
-        files={"replayFile": ("replay.osr", replay)},
-    ).json()
-    return res["renderID"]
+    try:
+        res = requests.post(
+            url="https://apis.issou.best/ordr/renders",
+            data=config,
+            files={"replayFile": ("replay.osr", replay)},
+        ).json()
+        return res["renderID"]
+    except Exception:
+        raise Exception("Couldn't post replay to o!rdr")
 
 
-def reply(score):
-    for submission in score["submissions"]:
-        try:
-            submission.reply(
-                "[**replay**]({videoUrl})\n\n---\n  ^(rendered by [o!rdr](https://ordr.issou.best/) | [Report issues](https://www.reddit.com/message/compose?to=u/allehS&subject={submission_id}:{score_id}:{render_id}) | [Source](https://github.com/shellawa/r-osugame-replay))".format(
-                    videoUrl=score["videoUrl"],
-                    submission_id=submission.id,
-                    score_id=score["score_info"]["id"],
-                    render_id=score["videoUrl"].split("/")[-1],
-                )
-            )
-        except:
-            log(fg.red + "Error: " + fg.yellow + "could't reply to the post" + fg.rs)
-            return
-        log(fg.green + "Replied to " + submission.id + fg.rs)
+def reply(scorepost, score):
+    try:
+        scorepost.reply(
+            f"[**replay**]({score['render_url']})\n\n---\n  ^(rendered by [o!rdr](https://ordr.issou.best/) | [Report issues](https://www.reddit.com/message/compose?to=u/allehS&subject={scorepost.id}:{score['score_id']}:{score['render_url']}))"
+        )
+    except Exception:
+        # raise Exception(f"Couldn't reply to {scorepost.id}")
+        raise Exception
+    return True
