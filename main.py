@@ -15,7 +15,7 @@ from utils import (
 
 load_dotenv()
 
-supabase = create_client(
+db = create_client(
     supabase_url=os.environ["SUPABASE_URL"],
     supabase_key=os.environ["SUPABASE_API_KEY"],
     options=ClientOptions(
@@ -44,7 +44,7 @@ def connect_error():
 @sio.on("render_done_json")
 def done(msg):
     score = (
-        supabase.table("scores")
+        db.table("scores")
         .select("*")
         .eq("render_id", str(msg["renderID"]))
         .execute()
@@ -53,25 +53,27 @@ def done(msg):
     if score == []:
         return
     score = (
-        supabase.table("scores")
+        db.table("scores")
         .update({"render_url": msg["videoUrl"]})
         .eq("score_id", score[0]["score_id"])
         .execute()
         .data
     )
     scoreposts = (
-        supabase.table("scoreposts")
+        db.table("scoreposts")
         .select("*", "scores(*)")
         .eq("score_id", score[0]["score_id"])
+        .eq("is_replied", False)
         .execute()
         .data
     )
     for scorepost in scoreposts:
         try:
             reply(reddit.submission(scorepost["scorepost_id"]), score[0])
-            supabase.table("scoreposts").update({"is_replied": True}).eq(
+            db.table("scoreposts").update({"is_replied": True}).eq(
                 "scorepost_id", scorepost["scorepost_id"]
             ).execute()
+            print(f"Replied to {scorepost.id}")
         except Exception as e:
             print("Error", e)
 
@@ -103,22 +105,23 @@ while True:
             score_info = find_score(parsed, access_token)
             log(f"Found the score: {score_info['id']}")
             stored_score = (
-                supabase.table("scores")
+                db.table("scores")
                 .select("*")
                 .eq("score_id", score_info["id"])
                 .execute()
                 .data
             )
             if stored_score != []:
-                supabase.table("scoreposts").insert(
+                db.table("scoreposts").insert(
                     {"scorepost_id": scorepost.id, "score_id": score_info["id"]}
                 ).execute()
                 if stored_score[0]["render_url"]:
                     log("Duplicated with a rendered score")
                     reply(scorepost, stored_score[0])
-                    supabase.table("scoreposts").update({"is_replied": True}).eq(
+                    db.table("scoreposts").update({"is_replied": True}).eq(
                         "scorepost_id", scorepost.id
                     ).execute()
+                    print(f"Replied to {scorepost.id}")
                 else:
                     log("Duplicated with a rendering score")
                 continue
@@ -126,10 +129,10 @@ while True:
             render_id = ordr_post(replay, score_info)
             log(f"Posted replay of {score_info["id"]} to o!rdr")
 
-            supabase.table("scores").insert(
+            db.table("scores").insert(
                 {"score_id": score_info["id"], "render_id": render_id}
             ).execute()
-            supabase.table("scoreposts").insert(
+            db.table("scoreposts").insert(
                 {"scorepost_id": scorepost.id, "score_id": score_info["id"]}
             ).execute()
 

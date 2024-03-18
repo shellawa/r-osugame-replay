@@ -169,6 +169,5 @@ def reply(scorepost, score):
             f"[**replay**]({score['render_url']})\n\n---\n  ^(rendered by [o!rdr](https://ordr.issou.best/) | [Report issues](https://www.reddit.com/message/compose?to=u/allehS&subject={scorepost.id}:{score['score_id']}:{score['render_url']}))"
         )
     except Exception:
-        # raise Exception(f"Couldn't reply to {scorepost.id}")
-        raise Exception
+        raise Exception(f"Couldn't reply to {scorepost.id}")
     return True
