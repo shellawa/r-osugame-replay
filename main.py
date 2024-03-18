@@ -73,9 +73,9 @@ def done(msg):
             db.table("scoreposts").update({"is_replied": True}).eq(
                 "scorepost_id", scorepost["scorepost_id"]
             ).execute()
-            print(f"Replied to {scorepost.id}")
+            log(f"Replied to {scorepost.id}")
         except Exception as e:
-            print("Error", e)
+            log("Error", e)
 
 
 sio.connect("https://apis.issou.best/", socketio_path="/ordr/ws")
@@ -121,7 +121,7 @@ while True:
                     db.table("scoreposts").update({"is_replied": True}).eq(
                         "scorepost_id", scorepost.id
                     ).execute()
-                    print(f"Replied to {scorepost.id}")
+                    log(f"Replied to {scorepost.id}")
                 else:
                     log("Duplicated with a rendering score")
                 continue
