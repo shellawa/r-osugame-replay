@@ -127,7 +127,7 @@ while True:
                 continue
             replay = replay_download(access_token, score_info)
             render_id = ordr_post(replay, score_info)
-            log(f"Posted replay of {score_info["id"]} to o!rdr")
+            log(f"Posted replay of {score_info['id']} to o!rdr")
 
             db.table("scores").insert(
                 {"score_id": score_info["id"], "render_id": render_id}
