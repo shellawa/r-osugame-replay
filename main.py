@@ -73,7 +73,7 @@ def done(msg):
             db.table("scoreposts").update({"is_replied": True}).eq(
                 "scorepost_id", scorepost["scorepost_id"]
             ).execute()
-            log(f"Replied to {scorepost.id}")
+            log(f"Replied to {scorepost['scorepost_id']}")
         except Exception as e:
             log("Error", e)
 
