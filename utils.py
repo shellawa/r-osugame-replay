@@ -17,7 +17,7 @@ def log(*args, **kwargs):
     try:
         requests.post(
             url=os.environ["WEBHOOK_LINK"],
-            json={"content": " ".join(args), "username": "allehS"},
+            json={"content": " ".join(str(x) for x in args), "username": "allehS"},
         )
     except Exception:
         pass
