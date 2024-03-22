@@ -97,7 +97,7 @@ while True:
     for scorepost in subreddit.stream.submissions(skip_existing=True):
         if not all([cue in scorepost.title for cue in scorepost_cues]):
             continue
-        log(f"New scorepost: ({scorepost.id}): {scorepost.title}")
+        log(f"New scorepost ({scorepost.id}): {scorepost.title}")
 
         try:
             parsed = parse_submission(scorepost.title)
