@@ -117,7 +117,7 @@ def ordr_post(replay, score_info):
     config = {
         "username": os.environ["RENDER_USERNAME"],
         "resolution": "1280x720",
-        "inGameBGDim": "90",
+        "inGameBGDim": "93",
         "showHitCounter": "true",
         "showAimErrorMeter": "true",
         "showScoreboard": "true",
