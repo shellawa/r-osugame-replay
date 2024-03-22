@@ -135,7 +135,6 @@ def ordr_post(replay, score_info):
                 "useSkinColors": "true",
             }
         )
-        log("Using EZ skin")
     elif (score_info["beatmap"]["ar"] >= 9.0) and (
         "DT" in score_info["mods"] or "NC" in score_info["mods"]
     ):
@@ -147,10 +146,8 @@ def ordr_post(replay, score_info):
                 "useSkinColors": "true",
             }
         )
-        log("Using DT skin")
     else:
         config.update({"skin": "FreedomDiveBTMC"})
-        log("Using NM skin")
 
     try:
         res = requests.post(
