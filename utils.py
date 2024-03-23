@@ -118,6 +118,7 @@ def ordr_post(replay, score_info):
         "username": os.environ["RENDER_USERNAME"],
         "resolution": "1280x720",
         "inGameBGDim": "90",
+        "customSkin": "true",
         "showHitCounter": "true",
         "showAimErrorMeter": "true",
         "showScoreboard": "true",
@@ -129,7 +130,6 @@ def ordr_post(replay, score_info):
     if "EZ" in score_info["mods"]:
         config.update(
             {
-                "customSkin": "true",
                 "skin": "11704",
                 "useBeatmapColors": "false",
                 "useSkinColors": "true",
@@ -140,14 +140,19 @@ def ordr_post(replay, score_info):
     ):
         config.update(
             {
-                "customSkin": "true",
-                "skin": "11683",
+                "skin": "17536",
                 "useBeatmapColors": "false",
                 "useSkinColors": "true",
             }
         )
     else:
-        config.update({"skin": "FreedomDiveBTMC"})
+        config.update(
+            {
+                "skin": "17535",
+                "useBeatmapColors": "true",
+                "useSkinColors": "false",
+            }
+        )
 
     try:
         res = requests.post(
