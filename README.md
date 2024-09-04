@@ -1,3 +1,5 @@
+# Archived in favor of [u/osu-bot](https://github.com/christopher-dG/osu-bot)
+
 # **r-osugame-replay**
 
 ## Description
